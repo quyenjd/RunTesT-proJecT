@@ -11,7 +11,7 @@ An efficient and simple tool that helps with test-generating (in preparation of 
 
 ## How to use
 
-Just follow the instructions from the program. Believe me, it's very easy to use.
+You just need to read and follow the instructions from the program carefully. Believe me, it's very easy to use.
 
 ## Changelog
 

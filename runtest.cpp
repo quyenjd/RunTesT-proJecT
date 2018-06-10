@@ -60,7 +60,7 @@ using namespace std;
 
 char VolumeName[MAX_PATH];
 
-string path_to_randomer, path_to_solution, input_form, output_form, console_title;
+string path_to_randomer, path_to_solution, input_form, output_form, console_title, TEMP;
 bool solution_needed, from_load;
 int idx, num_test, time_limit /* in ms */, mem_limit /* in KB */;
 
@@ -889,7 +889,7 @@ void ensure (string form)
     {
         struct stat info;
         if (stat(tp.c_str(), &info) != 0)
-            system((string("mkdir \"") + tp + "\" >nul").c_str());
+            system((string("mkdir \"") + tp + "\" >nul 2>&1").c_str());
         if (i)
             tp += '\\';
         tp += dirs[i + 1];
@@ -901,10 +901,12 @@ void run_generator ()
     console_title += " - Run generator";
     SetConsoleTitle(console_title.c_str());
     ob.clear();
-    vector<string> rf;
     string zz = path_to_randomer;
+    int i, obx, oby, exc;
     bool rerun = 0;
-    int i, obx, oby;
+
+    system((string("del /f /s /q \"") + TEMP + "\" >nul 2>&1").c_str());
+    system((string("mkdir \"") + TEMP + "\" >nul 2>&1").c_str());
 
     // check info
     ob.out("Please double-check your information:\n---\n\n");
@@ -969,11 +971,21 @@ void run_generator ()
             ob.out("--> Running generator ");
             string fcr = path_to_randomer, _fcr;
             go_back(fcr);
-            fcr += fform(input_form, i);
+            string frf = fform(input_form, i);
+            fcr += frf;
             ensure(fcr);
-            if (!rerun)
-                rf.push_back(fcr);
+            string _temp = TEMP + frf;
+            ensure(_temp);
+            go_back(_temp);
             proc gen(path_to_randomer, _ts(i) + ' ' + _ts(num_test), time_limit, mem_limit, "", fcr);
+            exc = system((string("copy /y \"") + fcr + "\" \"" + _temp + "\" >nul 2>&1").c_str());
+            if (exc)
+            {
+                ob.clear();
+                SetConsoleTitle("Error!");
+                ob.out("Cannot copy temporary files.");
+                exit(1);
+            }
             ui mu = 0, tu = 0, ex = 0;
             int obx, oby;
             ex = gen.run_and_wait_in_time_limit(mu, tu);
@@ -1001,10 +1013,20 @@ void run_generator ()
                 ob.out("--> Running solution ");
                 _fcr = path_to_randomer;
                 go_back(_fcr);
-                _fcr += fform(output_form, i);
+                frf = fform(output_form, i);
+                _fcr += frf;
                 ensure(_fcr);
-                if (!rerun)
-                    rf.push_back(_fcr);
+                _temp = TEMP + frf;
+                ensure(_temp);
+                go_back(_temp);
+                exc = system((string("copy /y \"") + fcr + "\" \"" + _temp + "\" >nul 2>&1").c_str());
+                if (exc)
+                {
+                    ob.clear();
+                    SetConsoleTitle("Error!");
+                    ob.out("Cannot copy temporary files.");
+                    exit(1);
+                }
                 proc sol(path_to_solution, "", time_limit, mem_limit, fcr, _fcr);
                 ex = sol.run_and_wait_in_time_limit(mu, tu);
                 run_yet = 1;
@@ -1097,7 +1119,6 @@ void run_generator ()
             {
                 i = idx;
                 ob.clear();
-                rf.clear();
                 goto __RUN;
             }
             if (!isdigit(tmp))
@@ -1114,7 +1135,7 @@ void run_generator ()
     }
 
     // 7z
-    if (!system("7za >nul"))
+    if (!system("7za >nul 2>&1"))
     {
         ob.out("---\n");
         ob.color(YELLOW, RED);
@@ -1136,28 +1157,18 @@ void run_generator ()
         for (int i = 0; i < 3; ++i)
             zz.pop_back();
         zz += "zip";
-        ob.out("\n\n");
-        for (int i = 0; i < (int)rf.size(); ++i)
+        ob.out("\n\n[7z]   Packing ... ");
+        int exc = system((string("7za a -tzip -y \"") + zz + "\" \"" + TEMP + "*\" >nul 2>&1").c_str());
+        if (exc)
         {
-            string lt = _ts(rf.size()), li = _ts(i + 1);
-            ob.get_position(obx, oby);
-            ob.clear_from_line(oby);
-            ob.out("[");
-            for (int j = 0; j < (int)(lt.length() - li.length()); ++j)
-                ob.out(" ");
-            ob.out(li + '/' + lt + "]   Packing: " + rf[i]);
-            int exc = system((string("7za a -tzip -y \"") + zz + "\" \"" + rf[i] + "\" >nul").c_str());
-            if (exc)
-            {
-                ob.clear();
-                SetConsoleTitle("Error!");
-                ob.out("7z failed to zip files (file: \"" + rf[i] + "\", zip: \"" + zz + "\")");
-                exit(1);
-            }
+            ob.clear();
+            SetConsoleTitle("Error!");
+            ob.out("7z failed to zip files!");
+            exit(1);
         }
         ob.get_position(obx, oby);
         ob.clear_from_line(oby);
-        ob.out("[" + _ts(rf.size()) + "/" + _ts(rf.size()) + "]   Packing complete!");
+        ob.out("[7z]   Packing complete! ");
     }
 
     // ask to save
@@ -1222,6 +1233,7 @@ void run_generator ()
 
     END_PHASE:do
     {
+        system((string("del /f /s /q \"") + TEMP + "\" >nul 2>&1").c_str());
         ob.clear();
         for (int i = 0; i < 16; ++i)
             console_title.pop_back();
@@ -1479,7 +1491,11 @@ int main ()
 {
     console_title = string("RunTesT proJecT v") + RunTesT_proJecT_version;
     SetConsoleTitle(console_title.c_str());
-    system("mkdir project >nul");
+    system("mkdir project >nul 2>&1");
+    GetTempPath(MAX_PATH, VolumeName);
+    ostringstream _conv;
+    _conv << VolumeName;
+    TEMP = _conv.str() + "runtest\\";
     Welcome();
     return 0;
 }

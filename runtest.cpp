@@ -1019,7 +1019,7 @@ void run_generator ()
                 _temp = TEMP + frf;
                 ensure(_temp);
                 go_back(_temp);
-                exc = system((string("copy /y \"") + fcr + "\" \"" + _temp + "\" >nul 2>&1").c_str());
+                exc = system((string("copy /y \"") + _fcr + "\" \"" + _temp + "\" >nul 2>&1").c_str());
                 if (exc)
                 {
                     ob.clear();
@@ -1157,6 +1157,7 @@ void run_generator ()
         for (int i = 0; i < 3; ++i)
             zz.pop_back();
         zz += "zip";
+        system((string("del /f /s /q \"") + zz + "\" >nul 2>&1").c_str());
         ob.out("\n\n[7z]   Packing ... ");
         int exc = system((string("7za a -tzip -y \"") + zz + "\" \"" + TEMP + "*\" >nul 2>&1").c_str());
         if (exc)

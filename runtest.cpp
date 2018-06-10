@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-#define RunTesT_proJecT_version "1.0a"
+#define RunTesT_proJecT_version "1.0c"
 
 #include <bits/stdc++.h>
 #include <windows.h>
@@ -1415,7 +1415,7 @@ void Welcome ()
     ob.clear();
     ob.out("Welcome to ");
     ob.color(YELLOW, LIGHTBLUE);
-    ob.out("RunTesT proJect v1.0a");
+    ob.out(string("RunTesT proJect v") + RunTesT_proJecT_version);
     ob.rcol();
     ob.out(" (with 7zip support)!\nThis is an efficient and simple tool that helps you generate tests quickly.\n---\n\n");
     ob.out("What do you want to do? (Use only ");

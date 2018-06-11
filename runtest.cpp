@@ -1115,7 +1115,7 @@ void run_generator ()
                 ob.out("\n\n");
                 break;
             }
-            if (tmp == 'a')
+            if (tmp == 'a' && !rer)
             {
                 i = idx;
                 ob.clear();

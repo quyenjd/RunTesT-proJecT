@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-#define RunTesT_proJecT_version "1.1"
+#define RunTesT_proJecT_version "1.1a"
 
 #include <bits/stdc++.h>
 #include <windows.h>

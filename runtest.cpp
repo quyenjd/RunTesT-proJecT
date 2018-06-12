@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-#define RunTesT_proJecT_version "1.1a"
+#define RunTesT_proJecT_version "1.1b"
 
 #include <bits/stdc++.h>
 #include <windows.h>
@@ -977,7 +977,7 @@ void run_generator ()
             string _temp = TEMP + frf;
             ensure(_temp);
             go_back(_temp);
-            proc gen(path_to_randomer, _ts(i) + ' ' + _ts(num_test), time_limit, mem_limit, "", fcr);
+            proc gen(path_to_randomer, _ts(i) + ' ' + _ts(num_test), time_limit, mem_limit, "nul", fcr, "nul");
             exc = system((string("copy /y \"") + fcr + "\" \"" + _temp + "\" >nul 2>&1").c_str());
             if (exc)
             {
@@ -1027,7 +1027,7 @@ void run_generator ()
                     ob.out("Cannot copy temporary files.");
                     exit(1);
                 }
-                proc sol(path_to_solution, "", time_limit, mem_limit, fcr, _fcr);
+                proc sol(path_to_solution, "", time_limit, mem_limit, fcr, _fcr, "nul");
                 ex = sol.run_and_wait_in_time_limit(mu, tu);
                 run_yet = 1;
                 ob.out(" ");
@@ -1083,8 +1083,8 @@ void run_generator ()
         ob.out("ESC");
         ob.rcol();
         ob.out(" to skip this part)   #");
-        int rer = rerun = 0;
-        bool esc = 0;
+        int rer = -1;
+        bool esc = rerun = 0;
         while (1)
         {
             bool fn = 0, arrow = 0;
@@ -1093,10 +1093,13 @@ void run_generator ()
                 continue;
             if (tmp == 8)
             {
-                if (rer)
+                if (rer >= 0)
                 {
                     ob.del_last();
-                    rer /= 10;
+                    if (rer == 0)
+                        rer = -1;
+                    else
+                        rer /= 10;
                 }
                 continue;
             }
@@ -1115,7 +1118,7 @@ void run_generator ()
                 ob.out("\n\n");
                 break;
             }
-            if (tmp == 'a' && !rer)
+            if (tmp == 'a')
             {
                 i = idx;
                 ob.clear();
@@ -1125,9 +1128,12 @@ void run_generator ()
                 continue;
             if ((rer * 10 + tmp - '0') == rer)
                 continue;
-            if ((rer * 10 + tmp - '0') >= (num_test + idx))
+            if ((max(0, rer * 10) + tmp - '0') >= (num_test + idx))
                 continue;
-            (rer *= 10) += tmp - '0';
+            if (rer == -1)
+                rer = tmp - '0';
+            else
+                (rer *= 10) += tmp - '0';
             ob.out(string(1, tmp));
         }
         if (esc)

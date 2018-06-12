@@ -92,14 +92,10 @@ public:
         // You need Input?
         if (!_input.empty())
             cmd += " < \"" + _input + "\"";
-		else
-			cmd += " <nul ";
 
         // You need Output?
         if (!_output.empty())
             cmd += " > \"" + _output + "\"";
-		else
-			cmd += " >nul ";
 
         // You need Stderr?
         if (!_stderr.empty()) {

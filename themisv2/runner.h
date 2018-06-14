@@ -131,7 +131,7 @@ public:
         PROCESS_MEMORY_COUNTERS pmc = {sizeof(PROCESS_MEMORY_COUNTERS)};
         if (!GetProcessMemoryInfo(pi.hProcess, &pmc, sizeof(pmc)))
             halt(crash, "Process Handler: Cannot get memory info!");
-        return pmc.PeakPagefileUsage / 1024;
+        return pmc.WorkingSetSize / 1024;
     }
 
     /* I'm using GetExitCodeProcess for getting the returned exit code by the process. */
@@ -160,8 +160,8 @@ public:
     }
 
     /* This function runs and waits for the program and terminate it if it reaches time limit.
-       - It should return inf   if the program has a TLE-verdict.
-       - It should return 2*inf if the program has a MLE-verdict.
+       - It should return -1 if the program has a TLE-verdict.
+       - It should return -1 if the program has a MLE-verdict.
        Otherwise, it returns the exit code.
        ** mem_used is used for saving maximum used memory.
 	   ** time_used is used for saving consumed time.
@@ -170,12 +170,17 @@ public:
         start();
         clock_t now = clock();
         while (opening() && clock() - now <= time) {
-            mem_used = memused();
-            if (mem_used > mem)
-                return 2 * inf;
+            mem_used = max(mem_used, memused());
+            if (mem_used > mem) {
+                mem_used = mem + 1;
+                return -1;
+            }
         }
         if (opening())
-            return inf;
+        {
+            time_used = time + 1;
+            return -1;
+        }
         time_used = timeinfo();
         return exitcode();
     }

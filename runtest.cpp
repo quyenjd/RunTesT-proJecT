@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-#define RunTesT_proJecT_version "1.1b"
+#define RunTesT_proJecT_version "1.1c"
 
 #include <bits/stdc++.h>
 #include <windows.h>
@@ -322,7 +322,6 @@ string to_lower (string s)
     return t;
 }
 
-// get working directory
 string workingd ()
 {
     char buffer[MAX_PATH];
@@ -902,7 +901,7 @@ void run_generator ()
     SetConsoleTitle(console_title.c_str());
     ob.clear();
     string zz = path_to_randomer;
-    int i, obx, oby, exc;
+    int i, obx, oby;
     bool rerun = 0;
 
     system((string("del /f /s /q \"") + TEMP + "\" >nul 2>&1").c_str());
@@ -978,17 +977,11 @@ void run_generator ()
             ensure(_temp);
             go_back(_temp);
             proc gen(path_to_randomer, _ts(i) + ' ' + _ts(num_test), time_limit, mem_limit, "nul", fcr, "nul");
-            exc = system((string("copy /y \"") + fcr + "\" \"" + _temp + "\" >nul 2>&1").c_str());
-            if (exc)
-            {
-                ob.clear();
-                SetConsoleTitle("Error!");
-                ob.out("Cannot copy temporary files.");
-                exit(1);
-            }
+            system((string("copy /y \"") + fcr + "\" \"" + _temp + "\" >nul 2>&1").c_str());
             ui mu = 0, tu = 0, ex = 0;
             int obx, oby;
             ex = gen.run_and_wait_in_time_limit(mu, tu);
+            gen.stop();
             SOME_INFO:do
             {
                 ob.out("- Done (time used: ");
@@ -1001,7 +994,12 @@ void run_generator ()
                     ob.out("MLE");
                 else
                     ob.out(_ts(mu) + " KB");
-                ob.out(", exitcode: " + _ts(ex) + ")\n");
+                ob.out(", exitcode: ");
+                if (ex == (ui)-1)
+                    ob.out("Terminated");
+                else
+                    ob.out(_ts(ex));
+                ob.out(")\n");
                 ob.get_position(obx, oby);
                 ob.out_from_coor(0, oby - 1, "...");
             }
@@ -1019,16 +1017,10 @@ void run_generator ()
                 _temp = TEMP + frf;
                 ensure(_temp);
                 go_back(_temp);
-                exc = system((string("copy /y \"") + _fcr + "\" \"" + _temp + "\" >nul 2>&1").c_str());
-                if (exc)
-                {
-                    ob.clear();
-                    SetConsoleTitle("Error!");
-                    ob.out("Cannot copy temporary files.");
-                    exit(1);
-                }
+                system((string("copy /y \"") + _fcr + "\" \"" + _temp + "\" >nul 2>&1").c_str());
                 proc sol(path_to_solution, "", time_limit, mem_limit, fcr, _fcr, "nul");
                 ex = sol.run_and_wait_in_time_limit(mu, tu);
+                sol.stop();
                 run_yet = 1;
                 ob.out(" ");
                 goto SOME_INFO;
@@ -1224,7 +1216,7 @@ void run_generator ()
             ob.out(string(1, tmp));
             fname += tmp;
         }
-        ofstream fo(".\\project\\" + fname + ".runtest");
+        ofstream fo(workingd() + "project\\" + fname + ".runtest");
         fo << path_to_randomer << endl;
         fo << path_to_solution << endl;
         fo << input_form << endl;
@@ -1498,7 +1490,7 @@ int main ()
 {
     console_title = string("RunTesT proJecT v") + RunTesT_proJecT_version;
     SetConsoleTitle(console_title.c_str());
-    system("mkdir project >nul 2>&1");
+    system((string("mkdir \"") + workingd() + "project\" >nul 2>&1").c_str());
     GetTempPath(MAX_PATH, VolumeName);
     ostringstream _conv;
     _conv << VolumeName;

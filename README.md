@@ -25,6 +25,6 @@ The program is not installed error handling so misbehavior can be caused by chan
 
 ## License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE.md](LICENSE.md) file for details.
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
 Themisv2 is my old project under the GNU General Public License, version 2. For more information, see [here](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html).
